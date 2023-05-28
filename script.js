@@ -4,27 +4,58 @@ const url = "https://jsonplaceholder.typicode.com/";
 //Create elements
 
 const app = () => {
-  const createPostElements = (data,parentElement, childElements) => {
-    const childElementsArr = Object.entries(childElements)
-    let elements = []
-      for (let i = 0; i < data.length; i++) {
+  const createDomElements = (data, parentElement, attAndTags) => {
+    const arrOfAttAndTags = Object.entries(attAndTags);
 
-          const parent = document.createElement(parentElement)
+    let elements = [];
+    for (let i = 0; i < data.length; i++) {
+      const parent = document.createElement(parentElement);
 
-          childElementsArr.forEach(child =>{
-            const [element, att] = child
+      arrOfAttAndTags.forEach((childElement) => {
+        const [att, tag] = childElement;
 
-            const childElement = document.createElement(element) 
-            childElement.textContent = data[i][att]
-            parent.appendChild(childElement)
+        const element = document.createElement(tag);
+        element.textContent = data[i][att];
+        parent.appendChild(element);
+      });
+      elements.push({
+        ["data"]: data[i],
+        ["element"]: parent,
+      });
+    }
+    return elements;
+  };
 
-        })
-        elements.push(parent)
-        
+  //Append elements
+
+  const appendElements = (parentArr, childArr, parentId, childId) => {
+    let elements = [];
+    for (let i = 0; i < parentArr.length; i++) {
+      const div = document.createElement("div");
+      const { data: parentData, element: parentElement } = parentArr[i];
+      childArr.forEach((child) => {
+        const { data: childData, element: childElement } = child;
+
+        if (childData[childId] === parentData[parentId]) {
+          childElement.style.border = "1px solid black";
+          div.appendChild(childElement);
+          div.style.border = "1px solid black";
+        }
+      });
+      if (div.hasChildNodes()) {
+        const title = document.createElement("h3");
+        title.textContent = "Comments:";
+        div.insertBefore(title, div.firstChild);
+        parentElement.appendChild(div);
       }
+      parentElement.style.padding = "1rem";
+      parentElement.style.margin = "0.5rem 0";
+      parentElement.style.border = "1px solid black";
+      elements.push(parentElement);
+    }
 
-      printElements('main',elements)
 
+    return elements;
   };
 
   //Fetch data
@@ -40,37 +71,24 @@ const app = () => {
       fetchData("comments"),
     ]);
 
-    const postWithComments = posts.reduce((acc, post) => {
-      let commentsPost = [];
-
-      for (let i = 0; i < comments.length; i++) {
-        if (post.id === comments[i].postId) {
-          commentsPost.push(comments[i]);
-        }
-      }
-
-      return [
-        ...acc,
-        {
-          ...post,
-          ["comments"]: commentsPost,
-        },
-      ];
-    }, []);
-
-
-
-    createPostElements(postWithComments,'article',{
-
-        'h1': 'title',
-        'p': 'body'
-
-    })
-
-    console.log(postWithComments);
+    const postElements = createDomElements(posts, "article", {
+      title: "h1",
+      body: "p",
+    });
+    const commentElements = createDomElements(comments, "div", {
+      name: "h3",
+      body: "p",
+    });
+    const postCommentsElements = appendElements(
+      postElements,
+      commentElements,
+      "id",
+      "postId"
+    );
+    printElements("main", postCommentsElements);
   };
 
-  const printElements = (parent,elements) => {
+  const printElements = (parent, elements) => {
     const main = document.createElement(parent);
 
     elements.forEach((element) => {
