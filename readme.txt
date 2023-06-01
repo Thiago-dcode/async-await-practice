@@ -1,1 +1,0 @@
-Script for learning more about async js.
