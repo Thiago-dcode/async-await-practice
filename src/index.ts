@@ -1,3 +1,4 @@
+import { createHtmlElement } from "./lib/createHtmlElement";
 
 type comment = {
   postId: number;
@@ -15,11 +16,12 @@ type post = {
 
 const appDiv = document.getElementById("app");
 const url = "https://jsonplaceholder.typicode.com/";
-
+const elemet = createHtmlElement('h1',{'textContent': 'Hello world'})
+appDiv?.appendChild(elemet)
 //Create elements
 
 const app = () => {
-  const createDomElements = (
+  const createHtmlElements = (
     data: comment[] | post[],
     parentElement: string,
     attAndTags: {
@@ -36,8 +38,8 @@ const app = () => {
       element: HTMLElement;
     }[] = [];
     for (let i: number = 0; i < data.length; i++) {
-      const parent = document.createElement(parentElement);
-
+      const parent = document.createElement(parentElement)
+      console.log
       arrOfAttAndTags.forEach((childElement) => {
         const [att, tag] = childElement;
 
@@ -105,11 +107,14 @@ const app = () => {
       fetchData("comments"),
     ]);
 
-    const postElements = createDomElements(posts, "article", {
+    const postElements = createHtmlElements(posts, 'article', {
+      
       title: "h1",
       body: "p",
+      id: 'h4'
     });
-    const commentElements = createDomElements(comments, "div", {
+
+    const commentElements = createHtmlElements(comments, 'div', {
       name: "h3",
       body: "p",
     });
@@ -137,4 +142,4 @@ const app = () => {
   getPosts();
 };
 
-app();
+// app();
