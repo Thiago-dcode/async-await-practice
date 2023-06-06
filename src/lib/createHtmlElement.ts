@@ -1,4 +1,4 @@
-export function createHtmlElement(
+export default function createHtmlElement(
   element: string,
   properties?: { [att: string]: string }
 ): HTMLElement {
@@ -8,9 +8,9 @@ export function createHtmlElement(
     const propsToArray = Object.entries(properties);
     propsToArray.forEach((prop) => {
       const [key, value] = prop;
-    
-       
-        Object.defineProperty(htmlElement, key, { value: value, writable: true });
+      
+        console.log(Object.getOwnPropertyDescriptor(htmlElement, 'innerHTML')?.writable)
+      
       }
     );
   }

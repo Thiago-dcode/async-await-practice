@@ -1,4 +1,4 @@
-import { createHtmlElement } from "./lib/createHtmlElement";
+import createHtmlElement from "./lib/createHtmlElement.js";
 
 type comment = {
   postId: number;
@@ -16,8 +16,15 @@ type post = {
 
 const appDiv = document.getElementById("app");
 const url = "https://jsonplaceholder.typicode.com/";
-const elemet = createHtmlElement('h1',{'textContent': 'Hello world'})
-appDiv?.appendChild(elemet)
+const element = createHtmlElement('h1',{'textContent': 'hello world'})
+console.log(element)
+if(appDiv){
+
+  appDiv.appendChild(element)
+}
+
+console.log(appDiv)
+
 //Create elements
 
 const app = () => {
