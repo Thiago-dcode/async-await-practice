@@ -1,4 +1,4 @@
-import { createHtmlElement } from "./createHtmlElement";
+import { createHtmlElement } from "../createHtmlElement";
 
 
 describe('CreateHtmlElement function',()=>{
