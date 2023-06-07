@@ -1,12 +1,14 @@
-import createHtmlElement from "./lib/createHtmlElement.js";
+import { createHtmlElement } from "./lib/elementsFactory.js";
 const appDiv = document.getElementById("app");
 const url = "https://jsonplaceholder.typicode.com/";
-const element = createHtmlElement('h1', { 'textContent': 'hello world' });
+const element = createHtmlElement('h1', { 'textContent': 'Hello World 1',
+    'innerHTML': '<p>Hello world 2</p>' });
 console.log(element);
 if (appDiv) {
     appDiv.appendChild(element);
+    appDiv.style.fontSize = '20px';
+    console.log(appDiv?.style.fontSize);
 }
-console.log(appDiv);
 //Create elements
 const app = () => {
     const createHtmlElements = (data, parentElement, attAndTags) => {
