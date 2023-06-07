@@ -151,4 +151,4 @@ const app = () => {
   getPosts();
 };
 
-// app();
+app();
