@@ -1,62 +1,104 @@
 import { htmlElementFactory } from "../elementsFactory";
-describe("htmlElementFactory function", () => {
-    const data = [
-        {
-            title: "hello world",
-            body: "hello all people of this world",
-        },
-        {
-            title: "hello world 1",
-            body: "hello all people of this world 1",
-        },
-    ];
-    const parentStyle = {
-        backgroundColor: 'red',
+describe("htmlElementFactory", () => {
+    const obj = {
+        title: "hello world",
+        body: "hello world people",
+        comments: [{
+                title: 'Comment title1',
+                body: 'Comment body1'
+            }, {
+                title: 'Comment title2',
+                body: 'Comment body2'
+            }, {
+                title: 'Comment title3',
+                body: 'Comment body3'
+            }],
     };
-    const dataElements = htmlElementFactory(data, { element: 'article', props: {}, styleProps: parentStyle }, {
-        'title': { element: 'h1', props: { className: 'style' }, styleProps: {
-                color: 'yellow'
-            } },
-        'body': { element: 'p', props: { className: 'style1' }, styleProps: {
-                color: 'blue'
-            } }
-    });
-    test('Testing the first argument with a wrong input', () => {
-        const dataElements = htmlElementFactory([], { element: 'article', props: {}, styleProps: parentStyle }, {
-            'title': { element: 'h1', props: { className: 'style' }, styleProps: {
-                    color: 'yellow'
-                } },
-            'body': { element: 'p', props: { className: 'style1' }, styleProps: {
-                    color: 'blue'
-                } }
+    test("Should render the comment prop array", () => {
+        const element = htmlElementFactory(obj, "article", {
+            title: {
+                element: "h1",
+                props: { className: "classTitle" },
+                styleProps: { color: "blue" },
+            },
+            body: {
+                element: "p",
+                props: { className: "classBody" },
+                styleProps: { color: "pink" },
+            },
+            comments: ['div', {
+                    'title': { element: 'h3', props: { className: 'commentTitleClass' }, styleProps: { 'fontSize': '25px' } },
+                    'body': { element: 'p', props: { className: 'commentBodyClass' }, styleProps: { 'fontSize': '15px' } }
+                }, 'section']
         });
-        expect(dataElements.length === 0).toBe(true);
+        if (element !== null)
+            expect(element.children[2].tagName).toBe("SECTION");
     });
-    test('Testing the first argument with a wrong input', () => {
-        const dataElements = htmlElementFactory([], { element: 'fdf', props: {}, styleProps: parentStyle }, {
-            'title': { element: 'h1', props: { className: 'style' }, styleProps: {
-                    color: 'yellow'
-                } },
-            'body': { element: 'p', props: { className: 'style1' }, styleProps: {
-                    color: 'blue'
-                } }
+    test("Should return an html element given a parent in a string format", () => {
+        const element = htmlElementFactory(obj, "article", {
+            title: {
+                element: "h1",
+                props: { className: "classTitle" },
+                styleProps: { color: "blue" },
+            },
+            body: {
+                element: "p",
+                props: { className: "classBody" },
+                styleProps: { color: "pink" },
+            },
         });
-        expect(dataElements.length === 0).toBe(true);
+        expect(element?.tagName).toBe("ARTICLE");
     });
-    test("should return an array of objects, where the first position is an object given and the second an html element", () => {
-        expect(JSON.stringify(dataElements[1].data)).toBe(JSON.stringify(data[1]));
-        expect(dataElements[0].element.tagName).toBe('ARTICLE');
+    test("Should return an html element given a parent in a element format", () => {
+        const parent = {
+            element: "section",
+            props: { className: "ParentClass" },
+            styleProps: { backgroundColor: "red" },
+        };
+        const element = htmlElementFactory(obj, parent, {
+            title: {
+                element: "h1",
+                props: { className: "classTitle" },
+                styleProps: { color: "blue" },
+            },
+            body: {
+                element: "p",
+                props: { className: "classBody" },
+                styleProps: { color: "pink" },
+            },
+        });
+        expect(element?.tagName).toBe("SECTION");
     });
-    test("The parent element given, should have the child element given", () => {
-        expect(dataElements[0].element.children[0].tagName).toBe('H1');
-        expect(dataElements[0].element.children[1].tagName).toBe('P');
+    test("Should return an html element given a parent in a HTMLelement format", () => {
+        const parent = document.createElement("section");
+        const element = htmlElementFactory(obj, parent, {
+            title: {
+                element: "h1",
+                props: { className: "classTitle" },
+                styleProps: { color: "blue" },
+            },
+            body: {
+                element: "p",
+                props: { className: "classBody" },
+                styleProps: { color: "pink" },
+            },
+        });
+        expect(element?.tagName).toBe("SECTION");
     });
-    test("The child elements, should have the props given", () => {
-        expect(dataElements[0].element.children[0].className).toBe('style');
-        expect(dataElements[0].element.children[1].className).toBe('style1');
-    });
-    test("The child elements, should have the textContent of the data props", () => {
-        expect(dataElements[0].element.children[0].textContent).toBe(data[0].title);
-        expect(dataElements[0].element.children[1].textContent).toBe(data[0].body);
+    test("Should return null given a wrong parent", () => {
+        const parent = document.createElement("section");
+        const element = htmlElementFactory({}, 'FDF', {
+            title: {
+                element: "h1",
+                props: { className: "classTitle" },
+                styleProps: { color: "blue" },
+            },
+            body: {
+                element: "p",
+                props: { className: "classBody" },
+                styleProps: { color: "pink" },
+            },
+        });
+        expect(element).toBe(null);
     });
 });

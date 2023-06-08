@@ -1,58 +1,36 @@
-interface element {
-  element: string;
-  props?: { [att: string]: string };
-  styleProps?: { [att: string]: string };
-}
-//Elements is an object, where each key represents a property of the array of
-//objects given. And the value, represents the instruccion to what to do with
-//that property.
-interface elements {
-  [objectAtt: string]: element | (() => HTMLElement[]);
-}
-
+import { element, elements } from "../types";
 export function htmlElementFactory(
   obj: object,
   parentEl: string | element | HTMLElement,
   props: elements
 ): HTMLElement | null {
   const propsToArray = Object.entries(props);
-  let parent: HTMLElement;
-  if (typeof parentEl === "string") {
-    parent = document.createElement(parentEl);
-  } else if (!(parentEl instanceof HTMLElement)) {
-    parent = createHtmlElement(
-      parentEl.element,
-      parentEl.props,
-      parentEl.styleProps
-    );
-  } else {
-    parent = parentEl;
-  }
+  let parent = createHtmlElement(parentEl);
 
   if (!(parent instanceof HTMLElement) || parent instanceof HTMLUnknownElement)
     return null;
 
-  propsToArray.forEach((prop,i) => {
+  propsToArray.forEach((prop, i) => {
     const [key, value] = prop;
-    if (typeof value === "object") {
+    if (!Array.isArray(value)) {
       const child = createHtmlElement(
         value.element,
         {
           textContent: obj[key as keyof typeof obj],
           ...value.props,
         },
-        value.styleProps
+        value?.styleProps
       );
       parent.appendChild(child);
-    }
-    if(typeof value === 'function'){
-      
-       value().forEach(parentChildElement =>{
-        parent.appendChild(parentChildElement)
-       })
-     
-    
-
+    } else {
+      const [parentOfValue, element, wrapper] = value;
+      const arrayPropToHtmlElement = htmlElementsFactory(
+        obj[key as keyof typeof obj],
+        parentOfValue,
+        element,
+        wrapper
+      );
+      parent.append(...arrayPropToHtmlElement);
     }
   });
 
@@ -63,49 +41,47 @@ export function htmlElementsFactory(
   arr: {}[],
   parentEl: string | element | HTMLElement,
   elements: elements,
-  wrapperEl?: string | element | HTMLElement,
-): HTMLElement[]|[] {
+  wrapperEl?: string | element | HTMLElement
+): HTMLElement[] | [] {
   if (arr.length === 0 || !Array.isArray(arr)) return [];
 
   try {
-    let elementsArr: HTMLElement[]  = []
-    
-   
+    let elementsArr: HTMLElement[] = [];
 
     for (let i = 0; i < arr.length; i++) {
       const parent = htmlElementFactory(arr[i], parentEl, elements);
       if (parent === null) return [];
-      elementsArr.push(
-       parent
-      );
+      elementsArr.push(parent);
     }
-    if(wrapperEl){
-   
-      const wrapperParent = createHtmlElement(wrapperEl)
-      wrapperParent.append(...elementsArr)
-     
-      return [wrapperParent]
+    if (wrapperEl) {
+      const wrapperParent = createHtmlElement(wrapperEl);
+      wrapperParent.append(...elementsArr);
+
+      return [wrapperParent];
     }
     return elementsArr;
   } catch (error) {
-    throw new Error("Somethin went wrong");
+    console.log(error);
+    return [];
   }
 }
 
 export function createHtmlElement(
-  element: string|HTMLElement|element,
+  element: string | HTMLElement | element,
   properties?: { [att: string]: string },
   styleProps?: { [att: string]: string }
 ): HTMLElement {
   let htmlElement: HTMLElement;
-  if(typeof element === 'string'){
-    htmlElement = document.createElement(element)
-  }
-  else if(element instanceof HTMLElement){
-    htmlElement = element
-  }
-  else{
-    htmlElement = createHtmlElement(element.element, element.props,element.styleProps)
+  if (typeof element === "string") {
+    htmlElement = document.createElement(element);
+  } else if (element instanceof HTMLElement) {
+    htmlElement = element;
+  } else {
+    htmlElement = createHtmlElement(
+      element.element,
+      element.props,
+      element.styleProps
+    );
   }
   if (properties) {
     addPropsHtmlElement(htmlElement, properties);
@@ -136,5 +112,18 @@ export function styleHtmlElement(
     const [key, value] = prop;
 
     (element.style[key as keyof typeof element.style] as any) = value;
+  });
+}
+
+
+export  const mergeArray = (parentArr: object[],childArr: object[], parentKey:string, childKey:string) =>{
+  return parentArr.map((parent: typeof parentArr[0]) => {
+    let childToMerge: typeof childArr[0][] = [];
+    childArr.forEach((child: typeof childArr[0]) => {
+      if (parent[parentKey as keyof typeof parent] === child[childKey as keyof typeof child]) {
+        childToMerge.push(child);
+      }
+    });
+    return { ...parent, comments: childToMerge };
   });
 }

@@ -28,13 +28,12 @@ describe("htmlElementFactory", () => {
         props: { className: "classBody" },
         styleProps: { color: "pink" },
       },
-      comments: ()=>{
-        
-        return htmlElementsFactory(obj.comments,'div',{
-            title: {element:'h3', props:{clasName: 'commentClass'}, styleProps:{fontSize:'30px'}},
-            body: {element:'p', props:{clasName: 'bodyCommentClass'}, styleProps:{fontSize:'20px'}},
-            
-        },'section')}
+      comments:  ['div', {
+        'title': {element: 'h3', props:{className: 'commentTitleClass'},styleProps:{'fontSize':'25px'}},
+        'body': {element: 'p', props:{className: 'commentBodyClass'},styleProps:{'fontSize':'15px'}}
+      
+       
+      },'section']
     });
     if(element !== null)
     expect(element.children[2].tagName).toBe("SECTION");

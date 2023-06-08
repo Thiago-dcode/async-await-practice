@@ -1,49 +1,59 @@
-export function htmlElementFactory(arr, parentEl, elements) {
+export function htmlElementFactory(obj, parentEl, props) {
+    const propsToArray = Object.entries(props);
+    let parent = createHtmlElement(parentEl);
+    if (!(parent instanceof HTMLElement) || parent instanceof HTMLUnknownElement)
+        return null;
+    propsToArray.forEach((prop, i) => {
+        const [key, value] = prop;
+        if (!Array.isArray(value)) {
+            const child = createHtmlElement(value.element, {
+                textContent: obj[key],
+                ...value.props,
+            }, value?.styleProps);
+            parent.appendChild(child);
+        }
+        else {
+            const [parentOfValue, element, wrapper] = value;
+            const arrayPropToHtmlElement = htmlElementsFactory(obj[key], parentOfValue, element, wrapper);
+            parent.append(...arrayPropToHtmlElement);
+        }
+    });
+    return parent;
+}
+export function htmlElementsFactory(arr, parentEl, elements, wrapperEl) {
     if (arr.length === 0 || !Array.isArray(arr))
         return [];
     try {
-        //declaring variables
         let elementsArr = [];
-        //Elements is an object, where each key represents a property of the array of
-        //objects given. And the value, represents the instruccion to what to do with
-        //that property.
-        const elementsToArray = Object.entries(elements);
         for (let i = 0; i < arr.length; i++) {
-            let parent;
-            if (typeof parentEl === "string") {
-                parent = document.createElement(parentEl);
-            }
-            else if (!(parentEl instanceof HTMLElement)) {
-                parent = createHtmlElement(parentEl.element, parentEl.props, parentEl.styleProps);
-            }
-            else {
-                parent = parentEl;
-            }
-            if (!(parent instanceof HTMLElement))
+            const parent = htmlElementFactory(arr[i], parentEl, elements);
+            if (parent === null)
                 return [];
-            elementsToArray.forEach((element) => {
-                const [key, value] = element;
-                if (typeof value == "object") {
-                    const child = createHtmlElement(value.element, {
-                        textContent: arr[i][key],
-                        ...value.props,
-                    }, value.styleProps);
-                    parent.appendChild(child);
-                }
-            });
-            elementsArr.push({
-                data: arr[i],
-                element: parent,
-            });
+            elementsArr.push(parent);
+        }
+        if (wrapperEl) {
+            const wrapperParent = createHtmlElement(wrapperEl);
+            wrapperParent.append(...elementsArr);
+            return [wrapperParent];
         }
         return elementsArr;
     }
     catch (error) {
-        throw new Error("Somethin went wrong");
+        console.log(error);
+        return [];
     }
 }
 export function createHtmlElement(element, properties, styleProps) {
-    const htmlElement = document.createElement(element);
+    let htmlElement;
+    if (typeof element === "string") {
+        htmlElement = document.createElement(element);
+    }
+    else if (element instanceof HTMLElement) {
+        htmlElement = element;
+    }
+    else {
+        htmlElement = createHtmlElement(element.element, element.props, element.styleProps);
+    }
     if (properties) {
         addPropsHtmlElement(htmlElement, properties);
     }
@@ -66,3 +76,14 @@ export function styleHtmlElement(element, styleProps) {
         element.style[key] = value;
     });
 }
+export const mergeArray = (parentArr, childArr, parentKey, childKey) => {
+    return parentArr.map((parent) => {
+        let childToMerge = [];
+        childArr.forEach((child) => {
+            if (parent[parentKey] === child[childKey]) {
+                childToMerge.push(child);
+            }
+        });
+        return { ...parent, comments: childToMerge };
+    });
+};
